@@ -53,6 +53,9 @@ class SparseSearchEngine:
         :param dtype: 矩阵数据类型，推荐 np.float32 以节省内存
         :return: csr_matrix, vocab_dict (Term -> ColIndex)
         """
+        for d in dict_list:
+            if '' in d:
+                del d['']
         n_docs = len(dict_list)
         
         # --- 第一步：构建词汇表 (Term -> ID) ---
@@ -62,7 +65,7 @@ class SparseSearchEngine:
         # 使用 set 去重加速，然后再转 dict 分配 ID
         all_terms = set()
         for d in dict_list:
-            all_terms.update(d.keys())
+            all_terms.update([k for k in d.keys() if len(k) > 0])
         
         # 分配 ID (这里可以按字母排序，也可以随机，不影响检索效果)
         for term in all_terms:
@@ -153,6 +156,9 @@ class SparseSearchEngine:
         :param top_k: 返回结果数量
         :return: list of (doc_id, score)
         """
+        if '' in query_dict:
+            del query_dict['']
+            
         query_vector = self._dict_to_vector(query_dict)
 
         # 2. 核心计算：矩阵向量乘法 (Scores = Docs @ Query)

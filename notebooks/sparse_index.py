@@ -11,14 +11,14 @@ import text_chunk
 from sparse_engine import SparseSearchEngine
 
 class SparseIndex:
-    def __init__(self, model, parent_documents: list[dict], work_path: str):
+    def __init__(self, model, work_path: str, parent_documents: list[dict]):
         self.model = model
         self.parent_documents = parent_documents
         self.parent_indices = []
         self.work_path = work_path
         self.matrix_path = os.path.join(self.work_path, 'matrix.npz')
         self.vocab_path = os.path.join(self.work_path, 'vocab.txt')
-        self.doc_ids_path = os.path.join(self.work_dir, "doc_ids.txt")
+        self.doc_ids_path = os.path.join(self.work_path, "doc_ids.txt")
         self.engine = SparseSearchEngine(self.work_path)
 
     def __load_sparse_dict(self, sparse_dict_path: str):
@@ -39,7 +39,7 @@ class SparseIndex:
             for line in inf:
                 self.parent_indices.append(int(line.strip()))
         
-        if not os.path.exists(self.matrix_path) or not os.path.exists(self.vocab_path) or os.path.exists(self.doc_ids_path):
+        if not os.path.exists(self.matrix_path) or not os.path.exists(self.vocab_path) or not os.path.exists(self.doc_ids_path):
             sparse_dict_l = self.__load_sparse_dict(self.work_path)
             print("loaded, sparse_dict_l.len:", len(sparse_dict_l))
             self.engine.build_index_by_dict_list(sparse_dict_l)
@@ -47,20 +47,31 @@ class SparseIndex:
 
         self.engine.load()
 
-    def search(self, query: str, top_k=10):
-        q = self.model.encode(texts, 
-                              batch_size=10, 
-                              return_dense=False, 
-                              return_sparse=True, 
-                              return_colbert_vecs=False)['lexical_weights']
+    def __gen_lexical_weights(self, texts):
+        l = self.model.encode(texts, 
+                         batch_size=10, 
+                         return_dense=False, 
+                         return_sparse=True, 
+                         return_colbert_vecs=False)['lexical_weights']
+        tokenizer = self.model.tokenizer
+        ret = []
+        for lexical_weights in l:
+            token_weights = {}
+            for k, v in lexical_weights.items():
+                token_weights[tokenizer.convert_ids_to_tokens([k])[0].replace("▁", "")] = v
+            ret.append(token_weights)
+        return ret
 
-        res_l = self.engine.search(q, top_k) # [(ids, score)]
+    def search(self, query: str, top_k=10):
+        q = self.__gen_lexical_weights([query])
+
+        res_l = self.engine.search(q[0], top_k) # [(ids, score)]
 
         ret_doc_l = []
-        seen_parent_idx_set = set([self.parent_indices[res] for res in res_l])
+        seen_parent_idx_set = set([self.parent_indices[doc_id] for doc_id,score in res_l])
 
         for parent_idx in seen_parent_idx_set:
-            ret_doc_l.append(parent_documents[parent_idx])
+            ret_doc_l.append(self.parent_documents[parent_idx])
 
         return ret_doc_l
 

@@ -36,7 +36,7 @@ def batch_calc_sparse(doc_l):
 
     sparse_l = []
     chunks = list(chunked(doc_l, 10))
-    for chunk in tqdm(chunks, total=len(chunks), desc="batch_calc_dense"):
+    for chunk in tqdm(chunks, total=len(chunks), desc="batch_calc_sparse"):
         sys.stderr = null_fp
         ret = __gen_lexical_weights(model, chunk)
         sys.stderr = sys.__stderr__
