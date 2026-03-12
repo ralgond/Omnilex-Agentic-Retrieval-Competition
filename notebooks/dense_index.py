@@ -58,7 +58,7 @@ class DenseIndex:
 
         # query_embedding = np.array(query_embedding)
         query_embedding = query_encoded_result['dense_vecs']
-        print("query_embedding.shape:", query_embedding.shape)
+        # print("query_embedding.shape:", query_embedding.shape)
 
         scores, indices = self.index.search(query_embedding, top_k)
 
