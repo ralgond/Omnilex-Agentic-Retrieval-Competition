@@ -9,7 +9,7 @@ def rerank_by_dense(reranker, query: str, documents: list, top_k=10):
         l.append((doc, score))
 
     sorted_l = sorted(l, key=lambda x: x[1], reverse=True)
-    return [term[0] for term in sorted_l][:top_k]
+    return sorted_l[:top_k]
 
 
 def rerank_by_dense_batch(reranker, query: str, documents: list, top_k=10, batch_size=10):
@@ -44,7 +44,7 @@ def rerank_by_dense_batch(reranker, query: str, documents: list, top_k=10, batch
 
     null_fp.close()
     
-    return [term[0] for term in sorted_l][:top_k]
+    return sorted_l[:top_k]
 
 def rerank_by_dense_batch_with_score(reranker, query: str, documents: list, top_k=10, batch_size=10):
     
@@ -89,7 +89,7 @@ def rerank_by_dense_batch_chunked(reranker, query: str, documents: list, top_k=1
     l = []
     pairs = []
     docs2 = []
-    for doc in tqdm(documents, total=len(documents), desc="rerank_by_dense"):
+    for doc in documents:
         for chunk in text_chunk.chunk_with_sliding_window(doc['text'], chunk_size, overlap_size):
             pairs.append([query, doc['text']])
             docs2.append(doc)
@@ -123,4 +123,4 @@ def rerank_by_dense_batch_chunked(reranker, query: str, documents: list, top_k=1
 
     null_fp.close()
     
-    return [term[0] for term in l2][:top_k]
+    return l2[:top_k]

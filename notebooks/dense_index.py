@@ -79,6 +79,48 @@ class DenseIndex:
             
         return ret
 
+    def search_batch(self, q_list, top_k):
+        '''
+        return: list of index of embeddings
+        '''
+        if not isinstance(q_list, list):
+            raise ValueError("q_list should be list")
+            
+        # =========================
+        # 4. 查询
+        # =========================
+        query_encoded_result = self.model.encode(
+            q_list
+        )
+
+        # query_embedding = np.array(query_embedding)
+        query_embedding = query_encoded_result['dense_vecs']
+        # print("query_embedding.shape:", query_embedding.shape)
+
+        scores, indices = self.index.search(query_embedding, top_k)
+
+        all_ret = []
+        for index in indices:
+            parent_indics = [self.parent_indices[idx] for idx in index]
+
+            seen_parent_indics = set()
+            parent_indics2 = []
+            for parent_idx in parent_indics:
+                if parent_idx in seen_parent_indics:
+                    pass
+                else:
+                    seen_parent_indics.add(parent_idx)
+                    parent_indics2.append(parent_idx)
+            
+            ret = []
+            for idx in parent_indics2:
+                ret.append(self.documents[idx])
+
+            all_ret.append(ret)
+            
+        return all_ret
+    
+
 # if __name__ == "__main__":
 #     from FlagEmbedding import FlagReranker, BGEM3FlagModel
 #     dense_model = BGEM3FlagModel('/root/.cache/modelscope/hub/models/BAAI/bge-m3', use_fp16=True)

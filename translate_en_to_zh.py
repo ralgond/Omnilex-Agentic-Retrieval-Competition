@@ -25,8 +25,8 @@ for idx, q in enumerate(test_df['query_en']):
     # print(completion.choices[0].message.content)
     query_zh_l.append(completion.choices[0].message.content)
 
-    print(idx)
+    print(idx, completion.choices[0].message.content)
 
-test_df['query_zh'] = query_de_l
+test_df['query_zh'] = query_zh_l
 
 test_df.to_csv("./data/test_zh.csv", index=False)
