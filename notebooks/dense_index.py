@@ -2,6 +2,7 @@ import os
 import os.path
 import numpy as np
 import faiss
+from typing import List, Tuple
 
 class DenseIndex:
     def __init__(self, model, embeddings_path, documents):
@@ -77,6 +78,34 @@ class DenseIndex:
         for idx in parent_indics2:
             ret.append(self.documents[idx])
             
+        return ret
+
+    def __deduplicate_by_float(self, data: List[Tuple[int, float]]) -> List[Tuple[int, float]]:
+        # 用 float 作为 key 去重
+        d = {}
+        for i, f in data:
+            if f not in d:
+                d[f] = (i, f)
+    
+        # 按 float 逆序排序
+        result = sorted(d.values(), key=lambda x: x[1], reverse=True)
+        return result
+    
+    def search_with_score(self, q, top_k):
+        query_encoded_result = self.model.encode(
+            [q]
+        )
+
+        query_embedding = query_encoded_result['dense_vecs']
+
+        scores, indices = self.index.search(query_embedding, top_k)
+
+        parent_index_score_l = [(self.parent_indices[idx], scores[0][i]) for i, idx in enumerate(indices[0])]
+
+        sorted_l = self.__deduplicate_by_float(parent_index_score_l)
+
+        ret = [(self.documents[idx], score) for idx, score in sorted_l]
+
         return ret
 
     def search_batch(self, q_list, top_k):

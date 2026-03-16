@@ -9,6 +9,7 @@ import re
 import Stemmer
 import text_chunk
 from sparse_engine import SparseSearchEngine
+from typing import List, Tuple
 
 class SparseIndex:
     def __init__(self, model, work_path: str, parent_documents: list[dict]):
@@ -74,6 +75,33 @@ class SparseIndex:
             ret_doc_l.append(self.parent_documents[parent_idx])
 
         return ret_doc_l
+
+    def __deduplicate_by_float(self, data: List[Tuple[int, float]]) -> List[Tuple[int, float]]:
+        # 用 float 作为 key 去重
+        d = {}
+        for i, f in data:
+            if f not in d:
+                d[f] = (i, f)
+    
+        # 按 float 逆序排序
+        result = sorted(d.values(), key=lambda x: x[1], reverse=True)
+        return result
+        
+    def search_with_score(self, query, top_k=10):
+        q = self.__gen_lexical_weights([query])
+
+        res_l = self.engine.search(q[0], top_k) # [(ids, score)]
+
+        parent_index_score_l = [(self.parent_indices[idx], score) for idx, score in res_l]
+
+        sorted_l = self.__deduplicate_by_float(parent_index_score_l)
+
+        ret = [(self.parent_documents[idx], score) for idx, score in sorted_l]
+
+        return ret
+
+        
+        
 
     
     

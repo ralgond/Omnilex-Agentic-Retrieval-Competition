@@ -9,7 +9,6 @@ client = OpenAI(
 )
 
 test_df = pd.read_csv("./data/test.csv")
-test_df['query_en'] = test_df['query']
 
 query_zh_l = []
 

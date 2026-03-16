@@ -23,6 +23,9 @@ def batch_calc_dense(doc_l):
         embeddings = model.encode(chunk, 
                             batch_size=10, 
                             max_length=512,
+                            return_dense=True, 
+                            return_sparse=False, 
+                            return_colbert_vecs=False,
                             verbose=False
                             )['dense_vecs']
         sys.stderr = sys.__stderr__
@@ -42,7 +45,7 @@ print("data loaded.")
 text_l = []
 parent_idx_l = []
 for parent_idx, court_text in enumerate(csv['text'].tolist()):
-    texts = text_chunk.chunk_with_sliding_window(court_text, 256, 64)
+    texts = text_chunk.chunk_with_sliding_window(court_text, 384, 128)
     text_l.extend(texts)
     for text in texts:
         parent_idx_l.append(parent_idx)

@@ -43,7 +43,7 @@ def BFS_citation(court_consideration_d, law_d, first_layer_citation, max_level=2
     
     while idx < len(queue):
         citation,level = queue[idx]
-        if level >= 2:
+        if level >= max_level:
             idx += 1
             break
             
