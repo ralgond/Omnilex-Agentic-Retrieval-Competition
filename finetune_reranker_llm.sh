@@ -1,0 +1,38 @@
+#!/bin/sh
+
+torchrun --nproc_per_node 2 \
+	-m FlagEmbedding.finetune.reranker.decoder_only.base \
+	--model_name_or_path /root/autodl-fs/bge-reranker-v2-gemma \
+    --use_lora True \
+    --lora_rank 16 \
+    --lora_alpha 32 \
+    --use_flash_attn True \
+    --target_modules q_proj k_proj v_proj o_proj \
+    --save_merged_lora_model True \
+    --model_type decoder \
+    --cache_dir ./cache/model \
+    --train_data ./ft_data/train.jsonl \
+    --cache_path ./cache/data \
+    --train_group_size 8 \
+    --query_max_len 512 \
+    --passage_max_len 512 \
+    --pad_to_multiple_of 8 \
+    --knowledge_distillation False \
+    --query_instruction_for_rerank 'A: ' \
+    --query_instruction_format '{}{}' \
+    --passage_instruction_for_rerank 'B: ' \
+    --passage_instruction_format '{}{}' \
+    --output_dir /root/autodl-fs/bge-reranker-v2-gemma-finetune \
+    --overwrite_output_dir \
+    --learning_rate 2e-4 \
+    --bf16 \
+    --num_train_epochs 1 \
+    --per_device_train_batch_size 2 \
+    --gradient_accumulation_steps 1 \
+    --dataloader_drop_last True \
+    --warmup_ratio 0.1 \
+    --gradient_checkpointing \
+    --weight_decay 0.01 \
+    --deepspeed ./ft_data/ds_stage0.json \
+    --logging_steps 1 \
+    --save_steps 1000

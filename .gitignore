@@ -214,6 +214,7 @@ CLAUDE.md
 # Data directories (large datasets)
 data/
 output/
+ft_data/
 
 # Large data files (indices, corpora)
 *.pkl

@@ -25,7 +25,7 @@ def rerank_by_dense_batch(reranker, query: str, documents: list, top_k=10, batch
         docs2.append(doc)
         if len(pairs) == batch_size:
             sys.stderr = null_fp
-            scores = reranker.compute_score(pairs, batch_size=batch_size, normalize=True, verbose=False)
+            scores = reranker.compute_score(pairs, max_length=1024, batch_size=batch_size, normalize=True, verbose=False)
             sys.stderr = sys.__stderr__
             for idx, _score in enumerate(scores):
                 l.append((docs2[idx], _score))
@@ -33,7 +33,7 @@ def rerank_by_dense_batch(reranker, query: str, documents: list, top_k=10, batch
             docs2 = []
     if len(pairs) > 0:
         sys.stderr = null_fp
-        scores = reranker.compute_score(pairs, batch_size=batch_size, normalize=True, verbose=False)
+        scores = reranker.compute_score(pairs, max_length=1024, batch_size=batch_size, normalize=True, verbose=False)
         sys.stderr = sys.__stderr__
         for idx, _score in enumerate(scores):
             l.append((docs2[idx], _score))
@@ -59,7 +59,7 @@ def rerank_by_dense_batch_with_score(reranker, query: str, documents: list, top_
         docs2.append(doc)
         if len(pairs) == batch_size:
             sys.stderr = null_fp
-            scores = reranker.compute_score(pairs, batch_size=batch_size, normalize=True, verbose=False)
+            scores = reranker.compute_score(pairs, max_length=1024, batch_size=batch_size, normalize=True, verbose=False)
             sys.stderr = sys.__stderr__
             for idx, _score in enumerate(scores):
                 l.append((docs2[idx], _score))
@@ -67,7 +67,7 @@ def rerank_by_dense_batch_with_score(reranker, query: str, documents: list, top_
             docs2 = []
     if len(pairs) > 0:
         sys.stderr = null_fp
-        scores = reranker.compute_score(pairs, batch_size=batch_size, normalize=True, verbose=False)
+        scores = reranker.compute_score(pairs, max_length=1024, batch_size=batch_size, normalize=True, verbose=False)
         sys.stderr = sys.__stderr__
         for idx, _score in enumerate(scores):
             l.append((docs2[idx], _score))
@@ -95,7 +95,7 @@ def rerank_by_dense_batch_chunked(reranker, query: str, documents: list, top_k=1
             docs2.append(doc)
         if len(pairs) >= batch_size:
             sys.stderr = null_fp
-            scores = reranker.compute_score(pairs, batch_size=batch_size, normalize=True, verbose=False)
+            scores = reranker.compute_score(pairs, max_length=1024, batch_size=batch_size, normalize=True, verbose=False)
             sys.stderr = sys.__stderr__
             for idx, _score in enumerate(scores):
                 l.append((docs2[idx], _score))
@@ -103,7 +103,7 @@ def rerank_by_dense_batch_chunked(reranker, query: str, documents: list, top_k=1
             docs2 = []
     if len(pairs) > 0:
         sys.stderr = null_fp
-        scores = reranker.compute_score(pairs, batch_size=batch_size, normalize=True, verbose=False)
+        scores = reranker.compute_score(pairs, max_length=1024, batch_size=batch_size, normalize=True, verbose=False)
         sys.stderr = sys.__stderr__
         for idx, _score in enumerate(scores):
             l.append((docs2[idx], _score))
